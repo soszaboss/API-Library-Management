@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy import DateTime, Column, Integer, String, ForeignKey, TEXT
+from sqlalchemy import DateTime, Column, Integer, String, ForeignKey, TEXT, Date
 from sqlalchemy.sql import func
 
 
@@ -48,13 +48,17 @@ class User(db.Model, UserMixin):
 class Book(db.Model):
     __tablename__ = 'book'
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(38), unique=True)
-    auteur: Mapped[str] = mapped_column(String(30))
-    date_published = Column(DateTime(), nullable=False)
-    genre: Mapped[str] = mapped_column(nullable=False)
+    title: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    auteur: Mapped[str] = mapped_column(String(50), nullable=False, default='Unknown')
+    date_published = Column(Date(), nullable=True)
+    genre: Mapped[str] = mapped_column(TEXT(),nullable=True)
     image: Mapped[str] = mapped_column(nullable=True)
-    isbn: Mapped[str] = mapped_column(nullable=False)
-    description: Mapped[str] = mapped_column(nullable=False)
+    isbn10: Mapped[str] = mapped_column(nullable=True, default=None)
+    isbn15: Mapped[str] = mapped_column(nullable=True, default=None)
+    description: Mapped[str] = mapped_column(TEXT(),nullable=True)
+    pages: Mapped[int] = mapped_column(nullable=True)
+    language: Mapped[str] = mapped_column(nullable=True, default='Unknown')
+    publisher: Mapped[str] = mapped_column(nullable=True, default=None)
 
     def __repr__(self):
         return '<Book %r>' % self.title
@@ -63,7 +67,8 @@ class Book(db.Model):
 class State(db.Model):
     __tablename__ = 'book_state'
     id = Column(Integer, primary_key=True)
-    state: Mapped[str] = mapped_column(String(38), unique=True)
+    state: Mapped[str] = mapped_column(String(15), unique=True)
+    description = Column(TEXT())
 
     def __repr__(self):
         return '<State %r>' % self.state

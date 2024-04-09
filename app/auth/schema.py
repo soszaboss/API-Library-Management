@@ -9,6 +9,3 @@ class UserSchema(ma.Schema):
     username = ma.fields.String()
     roles = ma.fields.String()
 
-
-class SuccessSchema(ma.Schema):
-    message = ma.fields.String()
