@@ -1,0 +1,30 @@
+D'accord, voici la documentation corrigée pour vos endpoints d'API en tenant compte des suggestions que j'ai fournies :
+
+1. **Authentification (Token)**
+    - `POST /auth/login` : Permet à un utilisateur de se connecter et renvoie un token d'accès.
+    - `POST /auth/logout` : Permet à un utilisateur de se déconnecter et invalide le token d'accès.
+
+2. **Utilisateurs**
+    - `GET /users/<id>` : Récupère les détails d'un utilisateur spécifique.
+    - `PUT /users/<id>` : Met à jour les détails d'un utilisateur spécifique.
+    - `DELETE /users/<id>` : Supprime un utilisateur spécifique.
+
+3. **Livres**
+    - `POST /books` : Ajoute un nouveau livre à la bibliothèque.
+    - `GET /books` : Récupère une liste de tous les livres.
+    - `GET /books/<id>` : Récupère les détails d'un livre spécifique.
+    - `PUT /books/<id>` : Met à jour les détails d'un livre spécifique.
+    - `DELETE /books/<id>` : Supprime un livre spécifique de la bibliothèque.
+
+4. **Exemplaires**
+    - `POST /copies` : Ajoute un nouvel exemplaire d'un livre à la bibliothèque.
+    - `GET /copies` : Récupère une liste de tous les exemplaires.
+    - `GET /copies/<id>` : Récupère les détails d'un exemplaire spécifique.
+    - `PUT /copies/<id>` : Met à jour les détails d'un exemplaire spécifique.
+    - `DELETE /copies/<id>` : Supprime un exemplaire spécifique de la bibliothèque.
+
+5. **Emprunts**
+    - `POST /loans` : Permet à un utilisateur d'emprunter un exemplaire de livre.
+    - `GET /loans` : Récupère une liste de tous les emprunts.
+    - `GET /loans/<id>` : Récupère les détails d'un emprunt spécifique.
+    - `PUT /loans/<id>` : Met à jour
