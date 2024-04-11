@@ -3,9 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy import DateTime, Column, Integer, String, ForeignKey, TEXT, Date
+from sqlalchemy import DateTime, Column, Integer, String, ForeignKey, TEXT, Date, Float, text
 from sqlalchemy.sql import func
-
+from datetime import datetime, timedelta
 
 # Initialize the Extension
 
@@ -51,11 +51,11 @@ class Book(db.Model):
     title: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     auteur: Mapped[str] = mapped_column(String(50), nullable=False, default='Unknown')
     date_published = Column(Date(), nullable=True)
-    genre: Mapped[str] = mapped_column(TEXT(),nullable=True)
+    genre: Mapped[str] = mapped_column(TEXT(), nullable=True)
     image: Mapped[str] = mapped_column(nullable=True)
     isbn10: Mapped[str] = mapped_column(nullable=True, default=None)
     isbn15: Mapped[str] = mapped_column(nullable=True, default=None)
-    description: Mapped[str] = mapped_column(TEXT(),nullable=True)
+    description: Mapped[str] = mapped_column(TEXT(), nullable=True)
     pages: Mapped[int] = mapped_column(nullable=True)
     language: Mapped[str] = mapped_column(nullable=True, default='Unknown')
     publisher: Mapped[str] = mapped_column(nullable=True, default=None)
@@ -85,10 +85,25 @@ class Copie(db.Model):
         return '<Copies %r>' % self.available
 
 
+class LoanStatus(db.Model):
+    __tablename__ = 'loan_status'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    state: Mapped[str] = mapped_column(nullable=False, unique=True)
+
+
 class Loan(db.Model):
     __tablename__ = 'loan'
     id: Mapped[int] = mapped_column(primary_key=True)
     copie: Mapped[int] = mapped_column(ForeignKey("copie.id"))
-    user: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    user: Mapped[int] = mapped_column(ForeignKey('user.id'), default=User.id)
     date_loaned = Column(DateTime(), default=func.now())
-    goback_date = Column(DateTime())
+    date_due = Column(DateTime, default=lambda: func.now() + text("interval '14 days'"))
+    loan_status: Mapped[int] = mapped_column(ForeignKey('loan_status.id'))
+
+
+class LoansReturn(db.Model):
+    __tablename__ = 'loans_return'
+    id = Column(Integer, primary_key=True)
+    loan_id = Column(Integer, ForeignKey('loan.id'))
+    date_returned = Column(DateTime(), default=func.now())
+    # fines_accrued = Column(Float, default=0.0)

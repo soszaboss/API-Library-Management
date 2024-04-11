@@ -4,8 +4,9 @@ from lxml import etree
 import pandas as pd
 import json
 
+
 class Scarpe:
-    def __init__(self, path ):
+    def __init__(self, path):
         self.URL = 'https://openlibrary.org/trending/forever'
         self.data = []
         self.PATH = path
@@ -35,6 +36,7 @@ class Scarpe:
         with open(path, 'w') as f:
             new_data = data.to_dict(orient='records')
             json.dump(new_data, f, indent=4)
+
     def pagination_pages(self):
         soup = self.soup_func(self.URL)
         # pagination list pages
@@ -85,7 +87,8 @@ class Scarpe:
                     'title': title,
                     'author': new_soup.find('a', attrs={'itemprop': 'author'}).text,
                     # xpath(new_soup, '//*[@id="contentBody"]/div[1]/div[3]/div[2]/span/h2[2]/a'),
-                    'publication_date': self.xpath(new_soup, '//*[@id="contentBody"]/div[1]/div[3]/div[5]/div/div[1]/span'),
+                    'publication_date': self.xpath(new_soup,
+                                                   '//*[@id="contentBody"]/div[1]/div[3]/div[5]/div/div[1]/span'),
                     'page': page,
                     'language': ' '.join(language),
                     'publishers': f"{', '.join(publishers)}",

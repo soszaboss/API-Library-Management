@@ -1,13 +1,16 @@
 import random
 import dateparser
 from flask import Flask
+from sqlalchemy import text
+
 from .config import Config
-from .database import db, User, Role, State, Book, Copie
+from .database import db, User, Role, State, Book, Copie, LoanStatus
 from flask_migrate import Migrate
 from flask_security import hash_password, SQLAlchemyUserDatastore, Security
 from flask_smorest import Api
 from faker import Faker
 import json
+from app.bot import scarpe_books_data
 
 
 def create_app(config_class=Config):
@@ -64,7 +67,7 @@ def create_app(config_class=Config):
                     "descprition": "Le livre peut être lu dans son intégralité : aucune page manquante ni aucun autre défaut susceptible de compromettre la lisibilité du texte."
                 }
             ]
-
+            loan_statuts = ["En Cours", "Retourné", "En Retard"]
             for state in state_books:
                 etat = state["etat"]
                 descprition = state["descprition"]
@@ -72,14 +75,31 @@ def create_app(config_class=Config):
                 if not book_state_exite:
                     db.session.add(State(state=etat, description=descprition))
 
+            for loan_statut in loan_statuts:
+                loan_statut_exist = db.session.query(LoanStatus).filter_by(state=loan_statut).one_or_none()
+                if not loan_statut_exist:
+                    db.session.add(LoanStatus(state=loan_statut))
+            db.session.execute(
+                text("ALTER TABLE loan ALTER COLUMN date_due SET DEFAULT (CURRENT_TIMESTAMP + INTERVAL '14 days')"))
+            db.session.commit()
+
+        with app.app_context():
+            scarpe_books_data(path='app/data/books.json')
             with open('app/data/books.json', 'r') as f:
                 books_data = json.load(f)
                 for data in books_data:
                     book = db.session.query(Book).filter_by(title=data['title']).one_or_none()
                     if not book:
+                        try:
+                            print(data['publication_date'])
+                            date = dateparser.parse(data['publication_date']).date() if data[
+                                'publication_date'] else None
+                        except (ValueError, TypeError):
+                            date = None
+
                         new_book = Book(title=data['title'],
                                         auteur=data['author'],
-                                        date_published=dateparser.parse(data['publication_date']).date(),
+                                        date_published=date,
                                         genre=data['genre'],
                                         image=data['image'],
                                         isbn10=data['isbn10'].strip() if data['isbn10'] != None else None,
@@ -100,6 +120,7 @@ def create_app(config_class=Config):
 
             db.session.commit()
 
+
     # implementing authentificztion
     from app.auth import blp as auth_blp
     api.register_blueprint(auth_blp)
@@ -108,4 +129,9 @@ def create_app(config_class=Config):
     from app.book import blp as book_blp
     api.register_blueprint(book_blp)
 
+    from app.copie import blp as copie_blp
+    api.register_blueprint(copie_blp)
+
+    from app.loan import blp as loan_blp
+    api.register_blueprint(loan_blp)
     return app

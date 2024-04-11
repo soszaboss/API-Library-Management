@@ -1,12 +1,11 @@
-from scarpe import Scarpe
-from function import file_exists
+from app.bot.scarpe import Scarpe
+from app.bot.function import file_exists
 
 
-def scarpe_books_data():
-    path = "../data/books.json"
+def scarpe_books_data(path):
     if not file_exists(path):
-        book = Scarpe("../data/books.json")
-        return book.scrape()
+        print('not file')
+        book = Scarpe(path)
+        return book.scrape(path)
 
 
-scarpe_books_data()
